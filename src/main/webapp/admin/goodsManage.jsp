@@ -19,52 +19,64 @@
 </head>
 <body class="jd-gray-bg">
 <div class="admin-wrap container-main mt-4 bg-white">
-  <!-- 后台左侧菜单 -->
+  <!-- 后台菜单 -->
   <div class="admin-left">
     <a href="goodsManage.jsp" style="background:#e1251b;color:#fff"><i class="bi bi-box-seam"></i> 商品管理</a>
     <a href="userManage.jsp"><i class="bi bi-person"></i> 用户管理</a>
-    <a href="orderManage.jsp"><i class="bi bi-receipt"></i> 订单管理</a>
     <a href="../index.jsp"><i class="bi bi-house"></i> 返回商城首页</a>
   </div>
-  <!-- 右侧操作区域 -->
   <div class="admin-right">
     <div class="d-flex justify-content-between align-items-center mb-4">
-      <h4>商品列表管理</h4>
-      <button class="jd-red-bg border-0 px-4 py-2">新增商品</button>
+      <h4>全部商品管理（数据库实时数据）</h4>
     </div>
-    <table class="table table-bordered">
+    <table class="table table-bordered" id="goodsTable">
       <thead class="table-light">
       <tr>
-        <th>商品ID</th>
-        <th>商品图片</th>
+        <th>ID</th>
+        <th>图片</th>
         <th>商品名称</th>
         <th>分类</th>
         <th>售价</th>
         <th>库存</th>
-        <th>操作</th>
+        <th>状态</th>
       </tr>
       </thead>
-      <tbody>
-      <tr>
-        <td>10001</td>
-        <td><img src="https://img14.360buyimg.com/n1/jfs/t1/189677/36/27018/41669/645c3241F86260661/0d64220090644002.jpg" width="60"></td>
-        <td>2025新款旗舰智能手机</td>
-        <td>手机数码</td>
-        <td class="jd-red">¥1999.00</td>
-        <td>236</td>
-        <td>
-          <button class="btn btn-sm btn-primary">编辑</button>
-          <button class="btn btn-sm btn-danger">下架删除</button>
-        </td>
-      </tr>
-      </tbody>
+      <tbody></tbody>
     </table>
   </div>
 </div>
 <footer>
   <div class="container-main">
-    <p>商家管理后台 ©2026 电子商城</p>
+    <p>商家管理后台 ©2026</p>
   </div>
 </footer>
+<script>
+  window.onload = function(){
+    requestApi("/api/admin/goods/all","GET",{},res=>{
+      let html = "";
+      res.data.forEach(item=>{
+        let imgSrc = item.coverImg || "https://picsum.photos/id/10/300/300";
+        html += `
+            <tr>
+                <td>${item.goodsId}</td>
+                <td>
+                    <img
+                        src="${imgSrc}"
+                        width="60"
+                        crossorigin="anonymous"
+                        onerror="this.src='https://picsum.photos/id/10/300/300'"
+                    >
+                </td>
+                <td>${item.goodsName}</td>
+                <td>${item.typeName}</td>
+                <td class="jd-red">¥${item.price}</td>
+                <td>${item.stock - item.lockedStock}</td>
+                <td>${item.status==1?"正常上架":"已下架"}</td>
+            </tr>`;
+      })
+      $("#goodsTable tbody").html(html);
+    })
+  }
+</script>
 </body>
 </html>

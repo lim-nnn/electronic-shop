@@ -19,71 +19,61 @@
 </head>
 <body class="jd-gray-bg">
 <div class="admin-wrap container-main mt-4 bg-white">
-    <!-- 后台左侧菜单 -->
     <div class="admin-left">
         <a href="goodsManage.jsp"><i class="bi bi-box-seam"></i> 商品管理</a>
         <a href="userManage.jsp" style="background:#e1251b;color:#fff"><i class="bi bi-person"></i> 用户管理</a>
-        <a href="orderManage.jsp"><i class="bi bi-receipt"></i> 订单管理</a>
         <a href="../index.jsp"><i class="bi bi-house"></i> 返回商城首页</a>
     </div>
-    <!-- 右侧用户管理表格 -->
     <div class="admin-right">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4>全部注册用户管理</h4>
-            <div>
-                <input placeholder="输入账号搜索" class="px-2 py-1 border">
-                <button class="jd-red-bg border-0 px-3 py-1">搜索</button>
-            </div>
-        </div>
-        <table class="table table-bordered">
+        <h4>注册用户列表（读取UserInfo表）</h4>
+        <table class="table table-bordered mt-4" id="userTable">
             <thead class="table-light">
             <tr>
                 <th>用户ID</th>
                 <th>登录账号</th>
-                <th>用户昵称</th>
+                <th>昵称</th>
+                <th>手机号</th>
                 <th>注册时间</th>
-                <th>用户类型</th>
+                <th>状态</th>
                 <th>操作</th>
             </tr>
             </thead>
-            <tbody>
-            <tr>
-                <td>1</td>
-                <td>zhangsan123</td>
-                <td>张三</td>
-                <td>2026-06-20</td>
-                <td>普通会员</td>
-                <td>
-                    <button class="btn btn-sm btn-danger">删除用户</button>
-                </td>
-            </tr>
-            <tr>
-                <td>2</td>
-                <td>admin001</td>
-                <td>管理员</td>
-                <td>2026-06-01</td>
-                <td>管理员</td>
-                <td><span class="text-secondary">不可操作</span></td>
-            </tr>
-            <tr>
-                <td>3</td>
-                <td>lisi456</td>
-                <td>小莉</td>
-                <td>2026-07-01</td>
-                <td>普通会员</td>
-                <td>
-                    <button class="btn btn-sm btn-danger">删除用户</button>
-                </td>
-            </tr>
-            </tbody>
+            <tbody></tbody>
         </table>
     </div>
 </div>
-
 <footer>
     <div class="container-main">
-        <p>商家管理后台 ©2026 电子商城</p>
+        <p>商家管理后台 ©2026</p>
     </div>
 </footer>
+<script>
+    window.onload = function(){
+        requestApi("/api/admin/user/all","GET",{},res=>{
+            let html = "";
+            res.data.forEach(item=>{
+                html += `
+            <tr>
+                <td>${item.userId}</td>
+                <td>${item.account}</td>
+                <td>${item.nickName}</td>
+                <td>${item.phone||"无"}</td>
+                <td>${item.createTime}</td>
+                <td>${item.status==1?"正常":"禁用"}</td>
+                <td>
+                    <button class="btn btn-sm btn-danger" onclick="delUser(${item.userId})">删除</button>
+                </td>
+            </tr>`;
+            })
+            $("#userTable tbody").html(html);
+        })
+    }
+    function delUser(userId){
+        if(!confirm("确定删除该用户？关联数据会报错！")) return;
+        requestApi("/api/admin/user/del","POST",{userId:userId},res=>{
+            location.reload();
+        })
+    }
+</script>
 </body>
 </html>

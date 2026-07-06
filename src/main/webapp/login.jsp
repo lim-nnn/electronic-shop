@@ -1,48 +1,115 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ include file="head.jsp" %>
 <html>
 <head>
-  <%@ include file="head.jsp" %>
   <style>
-    .login-box{width:380px;background:#fff;padding:35px;border-radius:4px;box-shadow:0 0 15px #eee;margin:80px auto}
-    .login-title{text-align:center;font-size:24px;margin-bottom:30px;color:#e1251b}
-    .input-item{margin-bottom:20px}
-    .input-item input{width:100%;height:44px;border:1px solid #ddd;padding:0 14px;outline:none}
-    .input-item input:focus{border-color:#e1251b}
-    .login-btn{width:100%;height:46px;border:none;background:#e1251b;color:#fff;font-size:16px;font-weight:bold}
-    .tip-text{text-align:center;margin-top:20px;color:#666}
-    .tip-text a{color:#e1251b}
+    .login-box {
+      width: 420px;
+      margin: 100px auto;
+      background: #fff;
+      padding: 40px;
+      border-radius: 6px;
+      box-shadow: 0 0 15px #eee;
+    }
+    .title {
+      text-align: center;
+      font-size: 24px;
+      margin-bottom: 30px;
+      color: #e1251b;
+      font-weight: bold;
+    }
+    .item {
+      margin-bottom: 20px;
+    }
+    .item label {
+      display: block;
+      margin-bottom: 6px;
+    }
+    .item input {
+      width: 100%;
+      height: 44px;
+      border: 1px solid #ddd;
+      padding: 0 12px;
+      outline: none;
+      border-radius: 4px;
+    }
+    .code-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .code-input {
+      flex: 1;
+    }
+    .code-img {
+      height: 44px;
+      cursor: pointer;
+      border: 1px solid #ddd;
+    }
+    .submit-btn {
+      width: 100%;
+      height: 46px;
+      background: #e1251b;
+      color: #fff;
+      border: none;
+      font-size: 16px;
+      border-radius: 4px;
+    }
+    .tip {
+      text-align: center;
+      margin-top: 15px;
+    }
+    .tip a {
+      color: #e1251b;
+    }
   </style>
 </head>
 <body class="jd-gray-bg">
 <div class="login-box">
-  <h2 class="login-title">商城账号登录</h2>
-  <div id="errorTip" class="text-danger text-center mb-3"></div>
+  <div class="title">用户登录</div>
   <form id="loginForm">
-    <div class="input-item">
+    <div class="item">
+      <label>账号</label>
       <input type="text" name="account" placeholder="请输入账号" required>
     </div>
-    <div class="input-item">
-      <input type="password" name="pwd" placeholder="请输入密码" required>
+    <div class="item">
+      <label>密码</label>
+      <input type="password" name="password" placeholder="请输入密码" required>
     </div>
-    <button class="login-btn" type="submit">登录</button>
+    <div class="item code-row">
+      <div class="code-input">
+        <label>图形验证码</label>
+        <input type="text" name="captcha" maxlength="4" placeholder="4位验证码" required>
+      </div>
+      <!-- 验证码图片，点击刷新 -->
+      <img class="code-img" id="captchaImg" src="/captcha/img">
+    </div>
+    <div class="item">
+      <button type="submit" class="submit-btn">登录</button>
+    </div>
+    <div class="tip">没有账号？<a href="register.jsp">立即注册</a></div>
   </form>
-  <div class="tip-text">
-    没有账号？<a href="register.jsp">立即注册</a>
-  </div>
 </div>
+
 <script>
-  $("#loginForm").submit(function(e){
+  // 点击刷新验证码
+  $("#captchaImg").click(function () {
+    // 加时间戳防止浏览器缓存
+    $(this).attr("src", "/captcha/img?t=" + new Date().getTime());
+  })
+
+  // 表单提交登录
+  $("#loginForm").submit(function (e) {
     e.preventDefault();
-    let data = {
-      account:this.account.value,
-      pwd:this.pwd.value
-    }
-    requestApi("/api/user/login","POST",data,function(res){
-      if(res.code == 200){
-        alert("登录成功！");
-        location.href="index.jsp"
-      }else{
-        $("#errorTip").text(res.msg)
+    let data = $(this).serialize();
+    requestApi("/api/user/login", "POST", data, function (res) {
+      if (res.code === 200) {
+        alert(res.msg);
+        location.href = "index.jsp";
+      } else {
+        alert(res.msg);
+        // 登录失败刷新验证码
+        $("#captchaImg").attr("src", "/captcha/img?t=" + new Date().getTime());
       }
     })
   })
